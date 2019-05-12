@@ -54,12 +54,22 @@ public class MainActivity extends AppCompatActivity {
                     msg("Lost connection.");
                     break;
                 case WHAT_RECV:
-                    msg((String) msg.obj);
+                    msgData((String) msg.obj);
                     break;
             }
         }
     };
-    
+
+    private void msgData(String msg) {
+        if (msg.equals(".")){
+            tv_log.append("\n");
+        }else{
+            tv_log.append(msg);
+        }
+        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+    }
+
+
 
     ////////////////////////////////////////////////
     @Override
@@ -79,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         initView();
         BThelperInit();//startActivityForResult(new Intent(this, DevicesDiscoveryActivity.class), R_DISCOVERY_DEVICE);
 
-         }
+    }
 
     private void initView() {
         mScrollView = findViewById(R.id.main_scrollview);
@@ -111,35 +121,35 @@ public class MainActivity extends AppCompatActivity {
 
 
     protected void BThelperInit(){
-                    if (mDevice.getName() != null) {
-                        mDeviceName = mDevice.getName();
-                    }
-                    msg("Device Name: " + mDevice.getName() + " Address: " + mDevice.getAddress());
-                    mBTHelper = new BTHelper(mDevice, new BTHelper.BTListener() {
-                        @Override
-                        public void onConnect(boolean success) {
-                            Message msg = mHandler.obtainMessage();
-                            msg.what = WHAT_CONNECT;
-                            msg.obj = success;
-                            mHandler.sendMessage(msg);
-                        }
+        if (mDevice.getName() != null) {
+            mDeviceName = mDevice.getName();
+        }
+        msg("Device Name: " + mDevice.getName() + " Address: " + mDevice.getAddress());
+        mBTHelper = new BTHelper(mDevice, new BTHelper.BTListener() {
+            @Override
+            public void onConnect(boolean success) {
+                Message msg = mHandler.obtainMessage();
+                msg.what = WHAT_CONNECT;
+                msg.obj = success;
+                mHandler.sendMessage(msg);
+            }
 
-                        @Override
-                        public void onDataReceived(String data) {
-                            Message msg = mHandler.obtainMessage();
-                            msg.what = WHAT_RECV;
-                            msg.obj = data;
-                            mHandler.sendMessage(msg);
-                        }
+            @Override
+            public void onDataReceived(String data) {
+                Message msg = mHandler.obtainMessage();
+                msg.what = WHAT_RECV;
+                msg.obj = data;
+                mHandler.sendMessage(msg);
+            }
 
-                        @Override
-                        public void onError() {
-                            mHandler.sendEmptyMessage(WHAT_ERROR);
-                        }
-                    });
-                    msg("Connecting to " + mDeviceName + ".");
-                    mBTHelper.connect(DEVICE_UUID);
-                }
+            @Override
+            public void onError() {
+                mHandler.sendEmptyMessage(WHAT_ERROR);
+            }
+        });
+        msg("Connecting to " + mDeviceName + ".");
+        mBTHelper.connect(DEVICE_UUID);
+    }
 
 
 
