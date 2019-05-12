@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void msg(String msg) {
+
         tv_log.append(msg + "\n");
         mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
     }
