@@ -19,6 +19,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -30,6 +34,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -38,6 +43,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -84,6 +91,7 @@ import info.nightscout.androidaps.plugins.pump.medtronic.util.MedtronicConst;
 import info.nightscout.androidaps.plugins.pump.medtronic.util.MedtronicUtil;
 import info.nightscout.androidaps.utils.SP;
 
+import static android.app.Notification.VISIBILITY_PUBLIC;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -123,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int WHAT_RECV = 2;
     String finalData = "";
     Button bt;
+    String CHANNEL_ID = "1234";
 
     private Handler mHandler = new Handler() {
         @Override
@@ -181,7 +190,15 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
                     prefsEditor.putString("MyObject", jsonArray.toString());
                     prefsEditor.commit();
-                    Toast.makeText(getApplicationContext(), "Object stored in SharedPreferences", Toast.LENGTH_LONG);
+                    if(Double.parseDouble(dataArr[2])<70){
+                        createNotificationChannel("Low glucose","check the app");
+                        notifs("Low glucose","check the app");
+                    }
+                    if(Double.parseDouble(dataArr[2])>110){
+                        createNotificationChannel("High glucose","check the app");
+                        notifs("High glucose","check the app");
+                    }
+
 
 
 
@@ -239,6 +256,17 @@ public class MainActivity extends AppCompatActivity {
         linearProgressBar = (ProgressBar)findViewById(R.id.progressBarCommandActivity);
         spinnyProgressBar = (ProgressBar)findViewById(R.id.progressBarSpinny);
         BThelperInit();//startActivityForResult(new Intent(this, DevicesDiscoveryActivity.class), R_DISCOVERY_DEVICE);
+//        NotificationManager notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        Notification note = new Notification(R.drawable.ic_notifications_black_24dp, "New E-mail", System.currentTimeMillis());
+//
+//        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class), 0);
+//
+//        //note.setLatestEventInfo(getApplicationContext(), "New E-mail", "You have one unread message.", intent);
+//
+//        notifManager.notify(NOTIF_ID, note);
+//        for (int i=0;i<1000000;i++) {
+//            notifManager.cancel(NOTIF_ID);
+
     }
 
 
@@ -279,9 +307,7 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         mScrollView = findViewById(R.id.main_scrollview);
         tv_log = findViewById(R.id.main_logview);
-        ev_cmd = findViewById(R.id.main_cmdview);
-        sp_br = findViewById(R.id.sp_br);
-        btn_send=findViewById(R.id.button);
+        btn_send=findViewById(R.id.scan);
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -302,17 +328,50 @@ public class MainActivity extends AppCompatActivity {
                 mBTHelper.send((data + br).getBytes());
             }
         });
-        bt = findViewById(R.id.button);
+        bt = findViewById(R.id.graph);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // JSONObject show=readFromFileSystem(getApplicationContext(),"data");
-                //Log.d("meeeeeeeeeeeee",String.valueOf(show));
+            Intent i=new Intent(getApplicationContext(),Graph.class);
+            startActivity(i);
             }
         });
 
-    }
+}
+    public void notifs(String title,String description){
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),CHANNEL_ID )
+                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                .setContentTitle(title)
+                .setContentText(description)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setVisibility(VISIBILITY_PUBLIC);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+// notificationId is a unique int for each notification that you must define
+        int notificationId=1234;
+        notificationManager.notify(notificationId, builder.build());
+    }
+    private void createNotificationChannel(String title,String description1) {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = title;
+            String description = description1;
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
     protected void BThelperInit() {
         if (mDevice.getName() != null) {
@@ -992,4 +1051,5 @@ class DrawerListAdapter extends BaseAdapter {
         iconView.setBackground(mNavItems.get(position).mIcon);
         return view;
     }
+
 }

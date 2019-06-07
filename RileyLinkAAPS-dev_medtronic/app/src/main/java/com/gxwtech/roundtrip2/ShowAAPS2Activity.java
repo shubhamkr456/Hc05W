@@ -1,5 +1,6 @@
 package com.gxwtech.roundtrip2;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -25,6 +28,7 @@ import android.widget.TextView;
 
 import info.nightscout.androidaps.plugins.pump.common.hw.rileylink.RileyLinkUtil;
 import info.nightscout.androidaps.plugins.pump.medtronic.comm.MedtronicCommunicationManager;
+import info.nightscout.androidaps.plugins.pump.medtronic.comm.data.history_old.record.ChangeBolusScrollStepSizePumpEvent;
 import info.nightscout.androidaps.plugins.pump.medtronic.comm.history.pump.PumpHistoryEntry;
 import info.nightscout.androidaps.plugins.pump.medtronic.comm.history.pump.PumpHistoryResult;
 import info.nightscout.androidaps.plugins.pump.medtronic.data.dto.BasalProfile;
@@ -596,12 +600,21 @@ public class ShowAAPS2Activity extends AppCompatActivity {
 
                     case "RefreshData.SetBolus": {
                         Float amount;
+                        String BolusList="";
+                        SharedPreferences sp = PreferenceManager
+                                .getDefaultSharedPreferences(getApplicationContext());
+                        SharedPreferences.Editor prefsEditor = sp.edit();
                         if (data1.equals("")) {
                             amount = getAmount();
                         }else {
                             amount=Float.parseFloat(data1);
                         }
                         if (amount != null)
+
+                         BolusList= sp.getString("MyBolusList", "");
+                         BolusList=BolusList+amount.toString();
+                         prefsEditor.putString("MyBolusList", BolusList);
+                         prefsEditor.commit();
                             returnData = getCommunicationManager().setBolus(amount);
                     }
                         break;
