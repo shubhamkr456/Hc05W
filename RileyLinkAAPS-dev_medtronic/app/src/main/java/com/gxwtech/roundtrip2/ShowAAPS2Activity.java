@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import info.nightscout.androidaps.interfaces.PumpDescription;
 import info.nightscout.androidaps.plugins.pump.common.hw.rileylink.RileyLinkUtil;
 import info.nightscout.androidaps.plugins.pump.medtronic.comm.MedtronicCommunicationManager;
 import info.nightscout.androidaps.plugins.pump.medtronic.comm.data.history_old.record.ChangeBolusScrollStepSizePumpEvent;
@@ -39,6 +40,8 @@ import info.nightscout.androidaps.plugins.pump.medtronic.data.dto.PumpSettingDTO
 import info.nightscout.androidaps.plugins.pump.medtronic.data.dto.TempBasalPair;
 import info.nightscout.androidaps.plugins.pump.medtronic.defs.BatteryType;
 import info.nightscout.androidaps.plugins.pump.medtronic.defs.MedtronicDeviceType;
+import info.nightscout.androidaps.plugins.pump.medtronic.driver.MedtronicPumpStatus;
+import info.nightscout.androidaps.plugins.pump.medtronic.service.RileyLinkMedtronicService;
 import info.nightscout.androidaps.plugins.pump.medtronic.util.MedtronicUtil;
 
 public class ShowAAPS2Activity extends AppCompatActivity {
@@ -183,6 +186,10 @@ public class ShowAAPS2Activity extends AppCompatActivity {
                 commandSelected(null);
             }
         });
+        MedtronicUtil.setPumpStatus(new MedtronicPumpStatus(new PumpDescription()));
+        Intent bindIntent = new Intent(this, RileyLinkMedtronicService.class);
+        startService(bindIntent);
+
 
         mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -385,7 +392,7 @@ public class ShowAAPS2Activity extends AppCompatActivity {
                 break;
 
             case "RefreshData.SetBolus": {
-                Boolean response = (Boolean)data;
+                Boolean response = true;
                 Float amount;
                 if (data1.equals("")) {
                     amount = getAmount();

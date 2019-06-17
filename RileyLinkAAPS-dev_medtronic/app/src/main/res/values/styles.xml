@@ -19,7 +19,7 @@
         <item name="android:background">@color/primary</item>
         <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
 
-        <item name="background">@color/primary</item>
+        <item name="background">@color/bluet</item>
         <item name="titleTextStyle">@style/MyActionBarTitleText</item>
     </style>
 

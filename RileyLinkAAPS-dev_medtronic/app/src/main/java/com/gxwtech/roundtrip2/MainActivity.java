@@ -45,12 +45,15 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -118,10 +121,13 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_BLUETOOTH_ENABLE = 1;
     private BluetoothDevice mDevice;
     private String mDeviceName = "Unknown Device";
-    private static String address = "00:21:13:05:6A:CD";
+//    private static String address = "00:21:13:05:6A:CD";
+    private static String address = "00:21:13:05:6A:D5";
+
     private BTHelper mBTHelper;
-    private ScrollView mScrollView;
+    private LinearLayout mScrollView;
     private TextView tv_log;
+    private TextView log;
     public EditText ev_cmd;
     private Spinner sp_br;
     private Button btn_send;
@@ -141,13 +147,13 @@ public class MainActivity extends AppCompatActivity {
                     boolean suc = (boolean) msg.obj;
                     if (suc) {
                         btn_send.setEnabled(true);
-                        msg("Connected to " + mDeviceName + ".\n---------------");
+                        msg("Connected to " + mDeviceName + ".\n---------------",false);
                     } else {
-                        msg("Can't connect to " + mDeviceName + ".");
+                        msg("Can't connect to " + mDeviceName + ".",true);
                     }
                     break;
                 case WHAT_ERROR:
-                    msg("Lost connection.");
+                    msg("Lost connection.",true);
                     break;
                 case WHAT_RECV:
                     String data = String.valueOf(msg.obj);
@@ -182,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    msg((String) msg.obj);
+                    msg1(dataArr[2]);
 //                    ShowAAPS2Activity hi=new ShowAAPS2Activity(dataArr[2]);
 //                    hi.startAction();
                     saveToFileSystem(getApplicationContext(), data, "data");
@@ -198,12 +204,7 @@ public class MainActivity extends AppCompatActivity {
                         createNotificationChannel("High glucose","check the app");
                         notifs("High glucose","check the app");
                     }
-
-
-
-
-
-//                    msg((String) msg.obj);
+                    //                    msg((String) msg.obj);
 
                     break;
             }
@@ -308,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
         mScrollView = findViewById(R.id.main_scrollview);
         tv_log = findViewById(R.id.main_logview);
         btn_send=findViewById(R.id.scan);
+        log=findViewById(R.id.log);
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -377,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
         if (mDevice.getName() != null) {
             mDeviceName = mDevice.getName();
         }
-        msg("Device Name: " + mDevice.getName() + " Address: " + mDevice.getAddress());
+        msg("Device Name: " + mDevice.getName() + " Address: " + mDevice.getAddress(),false);
         mBTHelper = new BTHelper(mDevice, new BTHelper.BTListener() {
             @Override
             public void onConnect(boolean success) {
@@ -406,12 +408,27 @@ public class MainActivity extends AppCompatActivity {
                 mHandler.sendEmptyMessage(WHAT_ERROR);
             }
         });
-        msg("Connecting to " + mDeviceName + ".");
+        msg("Connecting to " + mDeviceName + ".",false);
         mBTHelper.connect(DEVICE_UUID);
     }
-    public void msg(String msg) {
-        tv_log.append(msg + "\n");
-        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+    public void msg1(String msg) {
+        String text="";
+
+        if(Double.parseDouble(msg)<=70||Double.parseDouble(msg)>=110){
+            text = "<font color=#F72B0B>"+msg+"</font>" ;
+        } else{
+            text = "<font color=#05AD1C>"+msg+"</font>";
+        }
+        tv_log.setText(Html.fromHtml(text));
+//        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+    }
+    public void msg(String msg,boolean check) {
+        if (check == true) {
+            msg= "<font color=#F72B0B>"+msg+"</font>" ;
+        }
+
+        log.setText(Html.fromHtml(msg));
+//        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
     }
     public static synchronized void saveToFileSystem(Context context, String object, String binFileName) {
         try {
