@@ -26,6 +26,11 @@
     <style name="MyActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">@color/primary_light</item>
     </style>
+    <style name="Mynotif" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/primary_light</item>
+        <item name="android:textSize">30dp</item>
+    </style>
+
 
     <color name="primary">#9E9E9E</color>
     <color name="primary_dark">#616161</color>

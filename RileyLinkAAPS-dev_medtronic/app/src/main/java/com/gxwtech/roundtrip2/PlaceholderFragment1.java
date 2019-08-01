@@ -58,27 +58,33 @@ public class PlaceholderFragment1 extends Fragment {
         int numDataPoints=glucose1.length;
 //        int numDataPoints= bolus.size();
         for(int i=0; i<numDataPoints;i++){
-            x= x+1;
+            x= x+0.1;
 //            y= bolus.get(i);
             y=glucose1[i];
             series1.appendData(new DataPoint(x,y),true,100);
         }
         StaticLabelsFormatter staticLabelsFormatter;
         staticLabelsFormatter = new StaticLabelsFormatter(graph);
-        graph.getGridLabelRenderer().setHorizontalLabelsColor(getResources().getColor(R.color.red));
-        graph.getGridLabelRenderer().setVerticalLabelsColor(getResources().getColor(R.color.red));
+        graph.getGridLabelRenderer().setHorizontalLabelsColor(getResources().getColor(R.color.black));
+        graph.getGridLabelRenderer().setVerticalLabelsColor(getResources().getColor(R.color.black));
         graph.getGridLabelRenderer().setGridColor(getResources().getColor(R.color.red));
 //        graph.getGridLabelRenderer().setHorizontalLabelsAngle(145);
-        graph.getGridLabelRenderer().setTextSize(30f);
+        graph.getGridLabelRenderer().setTextSize(50f);
         graph.getGridLabelRenderer().setLabelsSpace(10);
         graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
-        graph.setTitle("Insulin Over Time");
+        graph.setTitle("Insulin Over Time(mg/min)");
         graph.setTitleColor(R.color.red);
         graph.setTitleTextSize(80);
         graph.animate();
         graph.setHorizontalScrollBarEnabled(true);
-        graph.setScaleX(1);
+
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setScalableY(true);
+        graph.getViewport().setScrollable(true);
         graph.setVerticalScrollBarEnabled(true);
+//        graph.getViewport().setXAxisBoundsManual(true);
+//        graph.getViewport().setMinX(1);
+        graph.setScaleX(1);
         graph.setMinimumWidth(20);
 
 

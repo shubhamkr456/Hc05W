@@ -33,12 +33,12 @@ public class man {
     public static void main(String args[])
     {
         man d2 = new man(60.4,0.85264,0.083783,0.98904,253.06,0.021936,0.20827,0.13313,0.063483,0.019775,0.00022993,0.010017,0.010027,0.00020492,0.0078994,0.0094409,0.0031099,0.0062476,0.58884,7.862);
-        double x0 = 1, y = 0, x = 4, h = 0.2;
+        double x0 = 0, y = 0, x = 4, h = 0.2;
         double states[]={0,0,0,110,0,0,381.988,76.154,0.00783015,130};
         double states1[]=d2.rungeKutta(x0, states, x, h);
         System.out.println("\nThe value of y at x is : ");
         for (int i=0;i<10;i++){
-            System.out.println(states1[i]);
+            //System.out.println(states1[i]);
         }
 
     }
@@ -167,21 +167,21 @@ public class man {
             for(int k=0;k<10;++k){
                 data1[k]=states[k]+0.5*k1a[k];
             }
-            double k2b[]=fstates(x0 + 0.5 * h,data1);
+            double k2b[]=fstates(x0 + 0.5 * h,states);
             for(int j=0;j<10;++j) {
                 k2a[j] = h * k2b[j];
             }
             for(int k=0;k<10;++k){
                 data2[k]=states[k]+0.5*k2a[k];
             }
-            double k3b[]=fstates(x0+0.5*h,data2);
+            double k3b[]=fstates(x0+0.5*h,states);
             for(int j=0;j<10;++j) {
                 k3a[j] = h * k3b[j];
             }
             for(int k=0;k<10;++k){
                 data3[k]=states[k]+k3a[k];
             }
-            double k4b[]=fstates(x0+h,data3);
+            double k4b[]=fstates(x0+h,states);
             for(int j=0;j<10;++j) {
                 k4a[j] = h * k4b[j];
             }
@@ -200,28 +200,46 @@ public class man {
 
             // Update next value of x
             x0 = x0 + h;
+            String text="";
+            for(int m=0;m<10;m++){
+                text=text+" "+String.valueOf(states[m]);
+            }
+            System.out.println(text);
+
         }
+
         return states;
     }
     double[] fstates(double x,double states[]) {
         double data[]=new double[10];
-        double kempt = (kmin + ((kmax - kmin) / 2) * (Math.tanh(alpha * (states[0] + states[1] - b * 40000)) - Math.tanh(beta * (states[0] + states[1] - c * 40))));
-        if (x < 2 && x >= 4) {
+        double kempt = (kmin + ((kmax - kmin) / 2) * (Math.tanh(alpha * ((states[0] + states[1]) - (b * 80000))) - Math.tanh(beta * ((states[0] + states[1]) - (c * 80000)))));
+        System.out.println(kempt);
+        if (x < 0 && x >= 2) {
             data[0] = -k21 * states[0];
 
         } else {
-            data[0] = -k21 * states[0] + 40;
+            data[0] = -k21 * states[0] + 40000;
         }
         data[1] = (-kempt * states[1] + k21 * states[0]);
         data[2] = -kabs * states[2] + kempt * states[1];
         double Ug=f*kabs*states[2];
-        data[3]=-p1*(states[3]-110)-states[8]*states[3]+(Ug/(bg*kg));
-        data[4]=-(ka1+kd)*states[4]+0.5*(states[3]-70);
+        double us;
+        if(x<=(1/6)){
+            us=72000;
+        }
+        else{
+            us=0;
+        }
+        data[3]=-p1*(states[3]-253.06)-states[8]*states[3]+(Ug/(bg*kg));
+        data[4]=-(ka1+kd)*states[4]+us;
         data[5]=-ka2*states[5]+kd*states[4];
         data[6]=-ke*states[6]+ka1*states[4]+ka2*states[5];
         data[7]=states[6]/(ki*bg);
         data[8]=-p2*states[8]+p3*states[7];
         data[9]=(-states[9]+states[3])/tau;
+        // System.out.println(data[0]+" "+data[1]+" "+data[2]+" "+data[3]+" "+data[4]+" "+data[5]+" "+data[6]+" "+data[7]+" "data[8]+" "+data[9]);
+        // System.out.println(data[0]+" "+data[1]+" "+data[2]+" "+data[3]+" "+data[4]+" "+data[5]+" "+data[6]+" "+data[7]+" "data[8]+" "+data[9]);
+
         return data;
     }
 

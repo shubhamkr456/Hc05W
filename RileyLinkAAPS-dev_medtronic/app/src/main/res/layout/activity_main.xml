@@ -17,15 +17,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:elevation="0dp">
+
             <android.support.v7.widget.Toolbar
                 android:id="@+id/mainActivityToolbar"
-                android:minHeight="?attr/actionBarSize"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="#0FA2D1"></android.support.v7.widget.Toolbar>
+                android:background="@color/bluet"
+                android:minHeight="?attr/actionBarSize">
+
+
+            </android.support.v7.widget.Toolbar>
+
+
 
         </android.support.design.widget.AppBarLayout>
-
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -44,51 +52,27 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
+                    android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
                     <TextView
-                        android:id="@+id/textLabelActivity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Activity:"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="@color/bluet" />
-
-                    <Space
-                        android:layout_width="20px"
-                        android:layout_height="20px" />
-
-                    <ProgressBar
-                        android:id="@+id/progressBarCommandActivity"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <Space
-                        android:layout_width="20px"
-                        android:layout_height="20px" />
-
-                    <TextView
-                        android:id="@+id/textViewActivity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Connecting to Service"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="@color/bluet" />
-
-                    <Space
-                        android:layout_width="20px"
-                        android:layout_height="20px" />
-
-                    <ProgressBar
-                        android:id="@+id/progressBarSpinny"
-                        style="?android:attr/progressBarStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:indeterminate="true"
-                        android:indeterminateBehavior="cycle" />
-
+                        android:text="Glucose Level at"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="60dp"
+                        android:textColor="@color/bluet"
+                        android:id="@+id/timetv"
+                        android:textSize="20dp"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -97,125 +81,47 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/textViewLabelRileyLink"
+                        android:id="@+id/main_logview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="RileyLink: "
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="@color/bluet" />
-
-                    <Space
-                        android:layout_width="20px"
-                        android:layout_height="20px" />
+                        android:text="132"
+                        android:textAlignment="center"
+                        android:textColor="#509612"
+                        android:textColorHint="#509612"
+                        android:textSize="70dp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginLeft="50dp"/>
 
                     <TextView
-                        android:id="@+id/textViewFieldRileyLink"
+                        android:id="@+id/main_unit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="(not found)"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="@color/bluet" />
-                </LinearLayout>
+                        android:layout_marginLeft="2dp"
+                        android:padding="@dimen/appbar_padding"
+                        android:text="mg/dL"
+                        android:textAlignment="center"
+                        android:textColor="@color/bluet"
+                        android:textColorHint="#509612"
+                        android:textSize="15dp"
+                        android:textStyle="italic" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/textViewLabelPump"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pump: "
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="@color/bluet" />
-
-                    <Space
-                        android:layout_width="20px"
-                        android:layout_height="20px" />
-
-                    <TextView
-                        android:id="@+id/textViewFieldPump"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(not found)"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="@color/bluet" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/buttonReadPumpClock"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@xml/button_border"
-                        android:onClick="onReadPumpClockButtonClicked"
-                        android:text="Read Pump Clock" />
-
-                    <Space
-                        android:layout_width="20px"
-                        android:layout_height="20px" />
-
-                    <TextView
-                        android:id="@+id/textViewPumpClockTime"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/buttonTunePump"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@xml/button_border"
-                    android:onClick="onTunePumpButtonClicked"
-                    android:padding="5dp"
-                    android:text="Wake and Tune" />
 
-                <Button
-                    android:id="@+id/buttonFetchHistory"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@xml/button_border"
-                    android:onClick="onFetchHistoryButtonClicked"
-                    android:padding="5dp"
-                    android:text="Fetch History and Save" />
 
-                <Button
-                    android:id="@+id/buttonFetchSavedHistory"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@xml/button_border"
-                    android:onClick="onFetchSavedHistoryButtonClicked"
-                    android:padding="5dp"
-                    android:text="Fetch Saved History" />
+                </LinearLayout>
 
-                <Button
-                    android:id="@+id/buttonViewEventLog"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@xml/button_border"
-                    android:onClick="onViewEventLogButtonClicked"
-                    android:padding="5dp"
-                    android:text="View Event Log" />
 
-                <Button
-                    android:id="@+id/buttonShowAAPS"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#509612"
-                    android:drawableLeft="@drawable/aaps_icon"
-                    android:onClick="onShowAAPSButtonClicked"
-                    android:text="@string/cmd_aaps_show_apps_cmd"
-                    android:textAllCaps="false" />
+
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#D9DBD9"
+                android:layout_marginTop="0dp"></LinearLayout>
 
 
 
@@ -223,44 +129,243 @@
                 android:id="@+id/main_scrollview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_weight="1.0"
-                android:background="#353635"
+                android:background="#FFFFFF"
                 >
 
-                <TextView
-                    android:id="@+id/main_logview"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="132"
-                    android:textAlignment="center"
-                    android:textColor="#509612"
-                    android:textColorHint="#509612"
-                    android:textSize="50dp"
-                    android:textStyle="bold"/>
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/main_unit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/text_margin"
-                    android:padding="@dimen/appbar_padding"
-                    android:text="units"
-                    android:textAlignment="center"
-                    android:textColor="@color/white"
-                    android:textColorHint="#509612"
-                    android:textSize="20dp"
-                    android:textStyle="italic" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginLeft="10dp">
 
-                <TextView
-                    android:id="@+id/log"
-                    android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/textLabelActivity"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Activity:"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@color/bluet" />
+
+                        <Space
+                            android:layout_width="20px"
+                            android:layout_height="20px" />
+
+                        <ProgressBar
+                            android:id="@+id/progressBarCommandActivity"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <Space
+                            android:layout_width="20px"
+                            android:layout_height="20px" />
+
+                        <TextView
+                            android:id="@+id/textViewActivity"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Connecting to Service"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@color/bluet" />
+
+                        <Space
+                            android:layout_width="20px"
+                            android:layout_height="20px" />
+
+                        <ProgressBar
+                            android:id="@+id/progressBarSpinny"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:indeterminate="true"
+                            android:indeterminateBehavior="cycle" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginLeft="10dp">
+
+                        <TextView
+                            android:id="@+id/textViewLabelRileyLink"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="RileyLink: "
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@color/bluet" />
+
+                        <Space
+                            android:layout_width="20px"
+                            android:layout_height="20px" />
+
+                        <TextView
+                            android:id="@+id/textViewFieldRileyLink"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="(not found)"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@color/bluet" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginLeft="10dp">
+
+                        <TextView
+                            android:id="@+id/textViewLabelPump"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pump: "
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@color/bluet" />
+
+                        <Space
+                            android:layout_width="20px"
+                            android:layout_height="20px" />
+
+                        <TextView
+                            android:id="@+id/textViewFieldPump"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="(not found)"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="@color/bluet" />
+                    </LinearLayout>
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#D9DBD9"></LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="TextView"
-                    android:textColor="#509612"
-                    android:textSize="20dp"/>
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/log"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Connected to CGM"
+                        android:textColor="#509612"
+                        android:textSize="20dp" />
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#D9DBD9"></LinearLayout>
+
+
+
 
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="#FFFFFF"
+                    android:layout_marginBottom="20dp"
+                    >
+
+                    <Button
+                        android:id="@+id/set"
+                        android:layout_width="69dp"
+                        android:layout_height="65dp"
+                        android:layout_marginLeft="60dp"
+                        android:layout_marginRight="20dp"
+                        android:background="@mipmap/pump"
+                        android:onClick="showPopup" />
+
+                    <Button
+                        android:id="@+id/pumpconnect"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_marginLeft="100dp"
+                        android:background="@drawable/ic_autorenew_grey600_36dp"
+                        android:onClick="refresh"
+
+                        />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        >
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Insulin"
+                            android:layout_marginTop="0dp"
+                            android:textColor="@color/bluet"
+                            android:id="@+id/timetvi"
+                            android:layout_marginLeft="140dp"
+                            android:textSize="20dp"
+                            android:textAppearance="?android:attr/textAppearanceMedium"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/main_logviewi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="4"
+                            android:textAlignment="center"
+                            android:textColor="@color/bluet"
+                            android:textColorHint="#509612"
+                            android:textSize="60dp"
+                            android:layout_marginLeft="160dp"
+                            android:textStyle="bold"
+                            />
+                        <TextView
+                            android:id="@+id/main_uniti"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="U"
+                            android:textAlignment="center"
+                            android:textColor="@color/bluet"
+                            android:textColorHint="#509612"
+                            android:textSize="15dp"
+                            android:textStyle="italic" />
+
+
+
+                    </LinearLayout>
+                </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -277,14 +382,16 @@
                 <Button
                     android:id="@+id/scan"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1.0"
                     android:background="@xml/button_border"
-
+                    android:onClick="scanbt"
                     android:text="Scan" />
 
             </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
+        </android.support.constraint.ConstraintLayout>
 
 
     </android.support.design.widget.CoordinatorLayout>
@@ -318,11 +425,11 @@
                 android:orientation="horizontal">
 
                 <ImageView
+                    android:id="@+id/apsApp_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/apsApp_icon"
-                    android:background="@drawable/exit_to_app"
-                    android:layout_gravity="center" />
+                    android:layout_gravity="center"
+                    android:background="@drawable/exit_to_app" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -347,5 +454,6 @@
             android:layout_height="match_parent" />
 
     </LinearLayout>
+
 
 </android.support.v4.widget.DrawerLayout>

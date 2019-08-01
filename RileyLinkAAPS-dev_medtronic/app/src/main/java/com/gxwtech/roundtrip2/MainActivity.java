@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.UUID;
 
 import org.json.JSONArray;
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -28,6 +30,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -55,9 +58,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +73,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -95,6 +101,8 @@ import info.nightscout.androidaps.plugins.pump.medtronic.util.MedtronicUtil;
 import info.nightscout.androidaps.utils.SP;
 
 import static android.app.Notification.VISIBILITY_PUBLIC;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -121,12 +129,16 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_BLUETOOTH_ENABLE = 1;
     private BluetoothDevice mDevice;
     private String mDeviceName = "Unknown Device";
-//    private static String address = "00:21:13:05:6A:CD";
-    private static String address = "00:21:13:05:6A:D5";
-
+   //private static String address = "00:21:13:05:6A:CD";
+   // private static String address = "00:21:13:05:6A:D5";
+    String address="";
+    String name="";
+    Button refresh;
     private BTHelper mBTHelper;
     private LinearLayout mScrollView;
     private TextView tv_log;
+    private TextView insulinlogview;
+    private TextView tvtime;
     private TextView log;
     public EditText ev_cmd;
     private Spinner sp_br;
@@ -137,7 +149,21 @@ public class MainActivity extends AppCompatActivity {
     public static final int WHAT_RECV = 2;
     String finalData = "";
     Button bt;
+    String note;
     String CHANNEL_ID = "1234";
+    boolean q=false;
+    boolean rclicked=false;
+    String loop="true";
+    Boolean openloopcheck=false;
+    Intent bindIntent;
+    int l=0;
+
+    private static final String FILE_NAME = "apdata.txt";
+//    public MainActivity(){
+//        SharedPreferences appSharedPrefs = PreferenceManager
+//                .getDefaultSharedPreferences(getApplication());
+//        this.address = appSharedPrefs.getString("BtAddress", "");
+//    }
 
     private Handler mHandler = new Handler() {
         @Override
@@ -146,16 +172,27 @@ public class MainActivity extends AppCompatActivity {
                 case WHAT_CONNECT:
                     boolean suc = (boolean) msg.obj;
                     if (suc) {
+
+                        String mydate = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+                        byte[] date=mydate.getBytes();
+                        mBTHelper.send(date);
+                        rclicked=true;
                         btn_send.setEnabled(true);
-                        msg("Connected to " + mDeviceName + ".\n---------------",false);
+                        msg("Connected to CGM " ,false);
                     } else {
-                        msg("Can't connect to " + mDeviceName + ".",true);
+                        rclicked=false;
+                        msg("Cannot connect to CGM",true);
                     }
                     break;
                 case WHAT_ERROR:
+                    rclicked=false;
                     msg("Lost connection.",true);
+                    notifs("Limiter Connection Lost","Check the app");
                     break;
                 case WHAT_RECV:
+                    if(rclicked==false){
+                        msg("Connected to CGM " ,false);
+                    }
                     String data = String.valueOf(msg.obj);
                     String[] dataArr = data.split("-", 6);
                     JSONObject dataObj = new JSONObject();
@@ -172,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences appSharedPrefs = PreferenceManager
                             .getDefaultSharedPreferences(getApplicationContext());
                     String json = appSharedPrefs.getString("MyObject", "");
+
                     JSONArray jsonArray=new JSONArray();
                     try {
                         jsonArray = new JSONArray(json);
@@ -188,19 +226,55 @@ public class MainActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    msg1(dataArr[2]);
-//                    ShowAAPS2Activity hi=new ShowAAPS2Activity(dataArr[2]);
-//                    hi.startAction();
-                    saveToFileSystem(getApplicationContext(), data, "data");
-                    //writeToFile(data,getApplicationContext());
+                    String text=String.valueOf((Double.parseDouble((dataArr[2]))/100)+0.1);
+                    msg1(dataArr[2],dataArr[0]);
                     SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
                     prefsEditor.putString("MyObject", jsonArray.toString());
+                    if(q==true) {
+                        if(MedtronicUtil.getMedtronicPumpModel()!=null) {
+                            ShowAAPS2Activity hi = new ShowAAPS2Activity(text, MainActivity.this);
+                            Boolean checkon = hi.commandSelected1("Set Bolus");
+
+                            String BolusList = "";
+                            BolusList = appSharedPrefs.getString("MyBolusList", "");
+                            BolusList = BolusList + "," + text;
+                            prefsEditor.putString("MyBolusList", BolusList);
+                            insulinlogview.setText(text.substring(0, 4));
+
+
+                            String checkcon = appSharedPrefs.getString("CheckCon", "");
+                            if (checkcon.equals("false")) {
+                                setRileylinkStatusMessage("not found");
+                                setPumpStatusMessage("(not found)");
+                                openloopcheck = false;
+                                notifs("Pump Connection not found", "Check the app");
+                            }
+                            if (checkcon.equals("true")) {
+                                setPumpStatusMessage("OK");
+                                openloopcheck = true;
+                                setRileylinkStatusMessage("OK");
+                            }
+                        }
+                        else {
+                            l=l+1;
+                        }
+                    }
+//                    try {
+//                        writeToFile(data,getApplicationContext());
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+                    save(data);
+//                    saveToFileSystem(getApplicationContext(), data, "data");
+                    //writeToFile(data,getApplicationContext());
+
+
                     prefsEditor.commit();
                     if(Double.parseDouble(dataArr[2])<70){
                         createNotificationChannel("Low glucose","check the app");
                         notifs("Low glucose","check the app");
                     }
-                    if(Double.parseDouble(dataArr[2])>110){
+                    if(Double.parseDouble(dataArr[2])>180){
                         createNotificationChannel("High glucose","check the app");
                         notifs("High glucose","check the app");
                     }
@@ -210,53 +284,78 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
+Bundle is;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.w(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         setupMenuAndToolbar();
-
-        mContext = this; // TODO: 09/07/2016 @TIM this should not be needed
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_BLUETOOTH_ENABLE);
-            Log.d("BT messagemainactivity:", "...Switching Bluetooth ON...");
+        is=savedInstanceState;
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        address = appSharedPrefs.getString("BtAddress", "");
+        loop = appSharedPrefs.getString("Loop", "true");
+        openloopcheck=getIntent().getBooleanExtra("fromopenloop",false);
+        name = appSharedPrefs.getString("name", "");
+        if(name.equals("")){
+            Intent signup=new Intent(this,SIgnup.class);
+            startActivity(signup);
         }
-        mDevice = bluetoothAdapter.getRemoteDevice(address);
+        if(address.equals("")){
+            Intent btscan=new Intent(this,ScanActivity.class);
+            startActivity(btscan);
+        }
 
-        initView();
 
-
-        // Sets default Preferences
-        PreferenceManager.setDefaultValues(this, R.xml.pref_pump, false);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_rileylink, false);
-
-        setBroadcastReceiver();
-
-        setBTReceiver();
-
-        // Temporary AAPS
-        MedtronicUtil.setPumpStatus(new MedtronicPumpStatus(new PumpDescription()));
-
-        /* start the RileyLinkMedtronicService */
-        /*
-         * using startService() will keep the service running until it is explicitly stopped
-         * with stopService() or by RileyLinkMedtronicService calling stopSelf().
-         * Note that calling startService repeatedly has no ill effects on RileyLinkMedtronicService
-         */
-        // explicitly call startService to keep it running even when the GUI goes away.
-        Intent bindIntent = new Intent(this, RileyLinkMedtronicService.class);
+            mContext = this; // TODO: 09/07/2016 @TIM this should not be needed
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (!bluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_BLUETOOTH_ENABLE);
+                Log.d("BT messagemainactivity:", "...Switching Bluetooth ON...");
+                finish();
+            }
+        bindIntent = new Intent(this, RileyLinkMedtronicService.class);
         startService(bindIntent);
 
+            if(openloopcheck==true) {
 
-        linearProgressBar = (ProgressBar)findViewById(R.id.progressBarCommandActivity);
-        spinnyProgressBar = (ProgressBar)findViewById(R.id.progressBarSpinny);
-        BThelperInit();//startActivityForResult(new Intent(this, DevicesDiscoveryActivity.class), R_DISCOVERY_DEVICE);
+                setRileylinkStatusMessage("OK");
+                setPumpStatusMessage("OK");
+                linearProgressBar = (ProgressBar) findViewById(R.id.progressBarCommandActivity);
+                spinnyProgressBar = (ProgressBar) findViewById(R.id.progressBarSpinny);
+                spinnyProgressBar.setVisibility(View.INVISIBLE);
+                showIdle();
+                // Sets default Preferences
+            }
+
+
+               else { // Sets default Preferences
+                PreferenceManager.setDefaultValues(this, R.xml.pref_pump, false);
+                PreferenceManager.setDefaultValues(this, R.xml.pref_rileylink, false);
+
+
+                // Temporary AAPS
+                MedtronicUtil.setPumpStatus(new MedtronicPumpStatus(new PumpDescription()));
+
+                /* start the RileyLinkMedtronicService */
+                /*
+                 * using startService() will keep the service running until it is explicitly stopped
+                 * with stopService() or by RileyLinkMedtronicService calling stopSelf().
+                 * Note that calling startService repeatedly has no ill effects on RileyLinkMedtronicService
+                 */
+                // explicitly call startService to keep it running even when the GUI goes away.
+
+                setBroadcastReceiver();
+
+                setBTReceiver();
+
+                linearProgressBar = (ProgressBar) findViewById(R.id.progressBarCommandActivity);
+                spinnyProgressBar = (ProgressBar) findViewById(R.id.progressBarSpinny);
+
+                //startActivityForResult(new Intent(this, DevicesDiscoveryActivity.class), R_DISCOVERY_DEVICE);
 //        NotificationManager notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 //        Notification note = new Notification(R.drawable.ic_notifications_black_24dp, "New E-mail", System.currentTimeMillis());
 //
@@ -267,6 +366,17 @@ public class MainActivity extends AppCompatActivity {
 //        notifManager.notify(NOTIF_ID, note);
 //        for (int i=0;i<1000000;i++) {
 //            notifManager.cancel(NOTIF_ID);
+            }
+
+                if(loop.equals("false")){
+            Intent oploop=new Intent(this,ShowAAPS2Activity.class);
+            startActivity(oploop);
+        }
+        if(!address.equals("")) {
+            mDevice = bluetoothAdapter.getRemoteDevice(address);
+            initView();
+            BThelperInit();
+        }
 
     }
 
@@ -305,36 +415,50 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(btReceiver, filter);
 
     }
+    @Override
+    public void onBackPressed()
+    {
+        Intent a = new Intent(Intent.ACTION_MAIN);
+        a.addCategory(Intent.CATEGORY_HOME);
+        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(a);
+    }
     private void initView() {
-        mScrollView = findViewById(R.id.main_scrollview);
         tv_log = findViewById(R.id.main_logview);
+        tvtime=findViewById(R.id.timetv);
+        insulinlogview=findViewById(R.id.main_logviewi);
+                ArrayList<Double> glucose=new ArrayList<>();
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        String json = appSharedPrefs.getString("MyObject", "");
+        String Boluslist=appSharedPrefs.getString("MyBolusList", "");
+        String Insulinrate=Boluslist.substring(Boluslist.lastIndexOf(",") + 1);
+        insulinlogview.setText(Insulinrate.substring(0,4));
+        JSONArray jsonArray=new JSONArray();
+        try {
+            jsonArray = new JSONArray(json);
+        }
+        catch (JSONException e) {
+            Log.e("log_tag", "Error parsing data " + e.toString());
+
+        }
+        try{
+            String hi=String.valueOf(Double.parseDouble(jsonArray.getJSONObject((jsonArray.length()-1)).get("glucoseLevel").toString()));
+            String time=String.valueOf(jsonArray.getJSONObject((jsonArray.length()-1)).get("time").toString());
+        msg1(hi,time);
+        }catch (JSONException e){
+            Log.e("log_tag", "Error parsing data " + e.toString());
+
+        }
         btn_send=findViewById(R.id.scan);
         log=findViewById(R.id.log);
-        btn_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String data = ev_cmd.getText().toString();
-                ev_cmd.setText("");
-                String br = "\n";
-                switch (sp_br.getSelectedItemPosition()) {
-                    case 0:
-                        br = "\n";
-                        break;
-                    case 1:
-                        br = "";
-                        break;
-                    case 2:
-                        br = "\r\n";
-                        break;
-                }
-                mBTHelper.send((data + br).getBytes());
-            }
-        });
+
+
         bt = findViewById(R.id.graph);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            Intent i=new Intent(getApplicationContext(),Graph.class);
+            Intent i=new Intent(getApplicationContext(),Graphs2.class);
             startActivity(i);
             }
         });
@@ -349,10 +473,12 @@ public class MainActivity extends AppCompatActivity {
                 .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                 .setContentTitle(title)
                 .setContentText(description)
+                .setStyle(new NotificationCompat.BigTextStyle().setBigContentTitle(title))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
-                .setVisibility(VISIBILITY_PUBLIC);
+                .setVisibility(VISIBILITY_PUBLIC)
+                .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 , 1000,1000,1000});
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
 // notificationId is a unique int for each notification that you must define
@@ -393,10 +519,9 @@ public class MainActivity extends AppCompatActivity {
             public void onDataReceived(String data) {
                 Message msg = mHandler.obtainMessage();
                 msg.what = WHAT_RECV;
-                msg.obj = data;
-                String str = Character.toString((char) Integer.parseInt(data));
+                String str =data;
                 finalData += str;
-                if (data.equals("10")) {
+                if (data.equals("*")) {
                     msg.obj = finalData;
                     finalData = "";
                     mHandler.sendMessage(msg);
@@ -411,15 +536,16 @@ public class MainActivity extends AppCompatActivity {
         msg("Connecting to " + mDeviceName + ".",false);
         mBTHelper.connect(DEVICE_UUID);
     }
-    public void msg1(String msg) {
+    public void msg1(String msg,String time) {
         String text="";
 
-        if(Double.parseDouble(msg)<=70||Double.parseDouble(msg)>=110){
+        if(Double.parseDouble(msg)<=70||Double.parseDouble(msg)>=180){
             text = "<font color=#F72B0B>"+msg+"</font>" ;
         } else{
             text = "<font color=#05AD1C>"+msg+"</font>";
         }
         tv_log.setText(Html.fromHtml(text));
+        tvtime.setText("Glucose Level at "+time);
 //        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
     }
     public void msg(String msg,boolean check) {
@@ -459,14 +585,24 @@ public class MainActivity extends AppCompatActivity {
 
         return obj;
     }
-    private void writeToFile(String data, Context context) {
+    private void writeToFile(String data, Context context) throws IOException {
+//        try {
+//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("config.txt", Context.MODE_PRIVATE));
+//            outputStreamWriter.write(data);
+//            outputStreamWriter.close();
+//        }
+//        catch (IOException e) {
+//            Log.e("Exception", "File write failed: " + e.toString());
+//        }
+        File path = context.getFilesDir();
+        File file = new File(path, "my.txt");
+        FileOutputStream stream = new FileOutputStream(file);
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("config.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
+            stream.write(data.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            stream.close();
         }
     }
     private String readFromFile(Context context) {
@@ -567,13 +703,13 @@ public class MainActivity extends AppCompatActivity {
                                 // TODO: 11/07/2016 @TIM UI message for user
                                 Log.e(TAG, "No Rileylink BLE Address saved in app");
                             } else {
-                                showBusy("Configuring Service", 50);
+                                showBusy("Connecting to Service", 50);
                                 MainApp.getServiceClientConnection().setThisRileylink(RileylinkBLEAddress);
                             }
                             break;
 
                         case RT2Const.local.INTENT_NEW_disconnectRileyLink: {
-                            showBusy("Configuring Service", 50);
+                            showBusy("Connecting to Service", 50);
                             MainApp.getServiceClientConnection().setThisRileylink(null);
                         }
                             break;
@@ -605,8 +741,9 @@ public class MainActivity extends AppCompatActivity {
                                     case "ReadPumpClock":
                                         ReadPumpClockResult clockResult = new ReadPumpClockResult();
                                         clockResult.initFromServiceResult(transport.getServiceResult());
-                                        TextView pumpTimeTextView = (TextView)findViewById(R.id.textViewPumpClockTime);
-                                        pumpTimeTextView.setText(clockResult.getTimeString());
+//                                        TextView pumpTimeTextView = (TextView)findViewById(R.id.textViewPumpClockTime);
+//                                        pumpTimeTextView.setText(clockResult.getTimeString());
+                                        Toast.makeText(getApplicationContext(), clockResult.getTimeString(), Toast.LENGTH_SHORT).show();
                                         showIdle();
                                         break;
                                     case "FetchPumpHistory":
@@ -658,16 +795,20 @@ public class MainActivity extends AppCompatActivity {
                         case RT2Const.IPC.MSG_ServiceNotification:
                             transport = new ServiceTransport(receivedIntent.getBundleExtra(RT2Const.IPC.bundleKey));
                             ServiceNotification notification = transport.getServiceNotification();
-                            String note = notification.getNotificationType();
+                            note = notification.getNotificationType();
                             switch (note) {
                                 case RT2Const.IPC.MSG_BLE_RileyLinkReady:
                                     setRileylinkStatusMessage("OK");
                                     break;
                                 case RT2Const.IPC.MSG_PUMP_pumpFound:
                                     setPumpStatusMessage("OK");
+                                    openloopcheck=true;
+                                    q=true;
                                     break;
                                 case RT2Const.IPC.MSG_PUMP_pumpLost:
                                     setPumpStatusMessage("Lost");
+                                    openloopcheck=false;
+                                    q=false;
                                     break;
                                 case RT2Const.IPC.MSG_note_WakingPump:
                                     showBusy("Waking Pump", 99);
@@ -704,6 +845,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * GUI element functions
      */
+
 
     private int mProgress = 0;
     private int mSpinnyProgress = 0;
@@ -799,10 +941,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void onShowAAPSButtonClicked(View view) {
+    public void onShowAAPSButtonClicked() {
         try {
             // startActivity(new Intent(getApplicationContext(), ShowAAPSActivity.class));
-            Intent i=new Intent(this,ShowAAPS2Activity.class);
+            mBTHelper.disconnect();
+
+            Intent i=new Intent(this,fingprint.class);
+            i.putExtra("fromopenloop",openloopcheck);
+            i.putExtra("check","openloop");
+            i.setFlags(FLAG_ACTIVITY_NO_HISTORY);
             startActivity(i);
         } catch (Exception ex) {
             LOG.error("Error loading activity: " + ex.getMessage(), ex);
@@ -850,6 +997,28 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
     }
+    public void save(String data) {
+        FileOutputStream fos = null;
+
+        try {
+            fos = openFileOutput(FILE_NAME, MODE_APPEND);
+            data=data+"\n";
+            fos.write(data.getBytes());
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
 
     public void setupMenuAndToolbar() {
@@ -862,6 +1031,7 @@ public class MainActivity extends AppCompatActivity {
         Drawable settingsIcon = getDrawable(R.drawable.settings);
         Drawable catIcon = getDrawable(R.drawable.cat);
         Drawable apsIcon = getDrawable(R.drawable.refresh);
+        Drawable openloopicon=getDrawable(R.drawable.pump);
 
         logsIcon.setColorFilter(getResources().getColor(R.color.primary_dark), PorterDuff.Mode.SRC_ATOP);
         historyIcon.setColorFilter(getResources().getColor(R.color.primary_dark), PorterDuff.Mode.SRC_ATOP);
@@ -876,6 +1046,8 @@ public class MainActivity extends AppCompatActivity {
         menuItems.add(new NavItem("Treatment Logs", logsIcon));
         menuItems.add(new NavItem("Settings", settingsIcon));
         menuItems.add(new NavItem("View LogCat", catIcon));
+        menuItems.add(new NavItem("Open Loop", apsIcon));
+        menuItems.add(new NavItem("GlucoseLog", logsIcon));
         DrawerListAdapter adapterMenu = new DrawerListAdapter(this, menuItems);
         mDrawerList.setAdapter(adapterMenu);
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -889,10 +1061,18 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 1:
                         // Pump History
+                        if(q!=true){
+                            alert();
+                            break;
+                        }
                         startActivity(new Intent(getApplicationContext(), HistoryPageListActivity.class));
                         break;
                     case 2:
                         // Treatment Logs
+                        if(q!=true){
+                            alert();
+                            break;
+                        }
                         startActivity(new Intent(getApplicationContext(), TreatmentHistory.class));
                         break;
                     case 3:
@@ -902,6 +1082,15 @@ public class MainActivity extends AppCompatActivity {
                     case 4:
                         // View LogCat
                         tools.showLogging();
+                        break;
+                    case 5:
+                        // Open Loop
+                        onShowAAPSButtonClicked();
+                        break;
+                    case 6:
+                        // Open Loop
+
+                        startActivity(new Intent(getApplicationContext(), Glucoselog.class));
                         break;
                 }
                 mDrawerLayout.closeDrawers();
@@ -960,6 +1149,182 @@ public class MainActivity extends AppCompatActivity {
             // FYI, only called if Service crashed or was killed, not on unbind
         }
     };
+
+    public void scanbt(View view) {
+        Intent i=new Intent(this,fingprint.class);
+        i.setFlags(FLAG_ACTIVITY_NO_HISTORY);
+        i.putExtra("check","scan");
+        startActivity(i);
+    }
+
+    public void showPopup(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.getMenuInflater().inflate(R.menu.pupup_menu, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.one:
+                        if(q!=true){
+                            alert();
+                            return true;
+                        }
+                        onReadPumpClockButtonClicked(view);
+                        return true;
+                    case R.id.two:
+                        if(q!=true){
+                            alert();
+                            return true;
+                        }
+                        onTunePumpButtonClicked(view);
+                        return true;
+                    case R.id.three:
+                        if(q!=true){
+                            alert();
+                            return true;
+                        }
+                        onFetchHistoryButtonClicked(view);
+                        return true;
+                    case R.id.four:
+                        if(q!=true){
+                            alert();
+                            return true;
+                        }
+                        onFetchSavedHistoryButtonClicked(view);
+                        return true;
+                    case R.id.five:
+                        if(q!=true){
+                            alert();
+                            return true;
+                        }
+                        onViewEventLogButtonClicked(view);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+        popup.show();
+    }
+    public void alert(){
+        AlertDialog.Builder a_builder = new AlertDialog.Builder(MainActivity.this);
+        a_builder.setMessage("Pump is not Connected !!!")
+                .setCancelable(false)
+                .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = a_builder.create();
+        alert.setTitle("Alert !!!");
+        alert.show();
+    }
+
+    public void refresh(View view) {
+        AlertDialog.Builder a_builder = new AlertDialog.Builder(MainActivity.this);
+        a_builder.setMessage("Do you want to REFRESH the Connections !!!")
+                .setCancelable(false)
+                .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        refresh12();
+                    }
+                })
+                .setNegativeButton("No",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }) ;
+        AlertDialog alert = a_builder.create();
+        alert.setTitle("Alert !!!");
+        alert.show();
+    }
+
+    private void refresh12() {
+        if(rclicked==false ||q==false){
+            refresh1();
+
+        }
+        else{
+            AlertDialog.Builder a_builder = new AlertDialog.Builder(MainActivity.this);
+            a_builder.setMessage("Connections are well established,Cannot refresh !!!")
+                    .setCancelable(false)
+                    .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = a_builder.create();
+            alert.setTitle("Alert !!!");
+            alert.show();
+        }
+    }
+
+    //    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
+    public void refresh1(){
+        mBTHelper.disconnect();
+      stopService(bindIntent);
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_BLUETOOTH_ENABLE);
+            Log.d("BT messagemainactivity:", "...Switching Bluetooth ON...");
+        }
+        mDevice = bluetoothAdapter.getRemoteDevice(address);
+        rclicked = true;
+
+
+
+        // Sets default Preferences
+        PreferenceManager.setDefaultValues(this, R.xml.pref_pump, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_rileylink, false);
+
+        setBroadcastReceiver();
+
+        setBTReceiver();
+
+        // Temporary AAPS
+        MedtronicUtil.setPumpStatus(new MedtronicPumpStatus(new PumpDescription()));
+
+        /* start the RileyLinkMedtronicService */
+        /*
+         * using startService() will keep the service running until it is explicitly stopped
+         * with stopService() or by RileyLinkMedtronicService calling stopSelf().
+         * Note that calling startService repeatedly has no ill effects on RileyLinkMedtronicService
+         */
+        // explicitly call startService to keep it running even when the GUI goes away.
+        startService( new Intent(this, RileyLinkMedtronicService.class));
+
+
+        linearProgressBar = (ProgressBar)findViewById(R.id.progressBarCommandActivity);
+        spinnyProgressBar = (ProgressBar)findViewById(R.id.progressBarSpinny);
+        BThelperInit();
+    }
+
+
 
     // public void sendAPSAppMessage(final View view) {
     // //listen out for a successful connection

@@ -60,54 +60,58 @@ public class PlaceholderFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_graph, container, false);
         LineGraphSeries<DataPoint> series1;
         double x,y;
-        double[] glucose1={1,2,3,4,2};
-//        ArrayList<Double> glucose=new ArrayList<>();
-//        SharedPreferences appSharedPrefs = PreferenceManager
-//                .getDefaultSharedPreferences(getContext());
-//        String json = appSharedPrefs.getString("MyObject", "");
-//        JSONArray jsonArray=new JSONArray();
-//        try {
-//            jsonArray = new JSONArray(json);
-//        }
-//        catch (JSONException e){
-//            Log.e("log_tag", "Error parsing data " + e.toString());
-//
-//        }for(int i=0;i<jsonArray.length();i++){
-//            try{
-//            glucose.add(Double.parseDouble(jsonArray.getJSONObject(i).get("glucoseLevel").toString()));
-//        }catch (JSONException e){
-//                Log.e("log_tag", "Error parsing data " + e.toString());
-//
-//            }
-//        }
+        double[] glucose1={109,120,113,129,102};
+        ArrayList<Double> glucose=new ArrayList<>();
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getContext());
+        String json = appSharedPrefs.getString("MyObject", "");
+        JSONArray jsonArray=new JSONArray();
+        try {
+            jsonArray = new JSONArray(json);
+        }
+        catch (JSONException e){
+            Log.e("log_tag", "Error parsing data " + e.toString());
+
+        }for(int i=jsonArray.length()-80;i<jsonArray.length();i++){
+            try{
+            glucose.add(Double.parseDouble(jsonArray.getJSONObject(i).get("glucoseLevel").toString()));
+        }catch (JSONException e){
+                Log.e("log_tag", "Error parsing data " + e.toString());
+
+            }
+        }
 
         x=0;
         GraphView graph= root.findViewById(R.id.graph);
         series1=new LineGraphSeries<>();
-        int numDataPoints=glucose1.length;
+        int numDataPoints=glucose.size();
 //        int numDataPoints= glucose.size();
         for(int i=0; i<numDataPoints;i++){
             x= x+1;
-//            y= glucose.get(i);
-            y=glucose1[i];
-            series1.appendData(new DataPoint(x,y),true,100);
+            y= glucose.get(i);
+//            y=glucose1[i];
+            series1.appendData(new DataPoint(x,y),true,80);
         }
         StaticLabelsFormatter staticLabelsFormatter;
         staticLabelsFormatter = new StaticLabelsFormatter(graph);
-        graph.getGridLabelRenderer().setHorizontalLabelsColor(getResources().getColor(R.color.red));
-        graph.getGridLabelRenderer().setVerticalLabelsColor(getResources().getColor(R.color.red));
+        graph.getGridLabelRenderer().setHorizontalLabelsColor(getResources().getColor(R.color.black));
+        graph.getGridLabelRenderer().setVerticalLabelsColor(getResources().getColor(R.color.black));
         graph.getGridLabelRenderer().setGridColor(getResources().getColor(R.color.red));
 //        graph.getGridLabelRenderer().setHorizontalLabelsAngle(145);
-        graph.getGridLabelRenderer().setTextSize(30f);
+        graph.getGridLabelRenderer().setTextSize(50f);
         graph.getGridLabelRenderer().setLabelsSpace(10);
         graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
-        graph.setTitle("Glucose Over Time");
+        graph.setTitle("Glucose Over Time(mg/min)");
         graph.setTitleColor(R.color.red);
         graph.setTitleTextSize(80);
         graph.animate();
         graph.setHorizontalScrollBarEnabled(true);
-        graph.setScaleX(1);
+
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setScalableY(true);
+        graph.getViewport().setScrollable(true);
         graph.setVerticalScrollBarEnabled(true);
+        graph.setScaleX(1);
         graph.setMinimumWidth(20);
 
 

@@ -1,5 +1,6 @@
 package com.gxwtech.roundtrip2;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,11 +21,21 @@ public class Graph extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
+        int i=getIntent().getIntExtra("fragment",1);
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = findViewById(R.id.view_pager);
-        sectionsPagerAdapter.addFragment(new PlaceholderFragment(),"Glucose");
-        sectionsPagerAdapter.addFragment(new PlaceholderFragment1(),"Insulin");
+        if(i==2) {
+            sectionsPagerAdapter.addFragment(new PlaceholderFragment1(), "Insulin");
+            sectionsPagerAdapter.addFragment(new PlaceholderFragment(), "Glucose");
+
+        }
+        else{
+            sectionsPagerAdapter.addFragment(new PlaceholderFragment(), "Glucose");
+            sectionsPagerAdapter.addFragment(new PlaceholderFragment1(), "Insulin");
+        }
+
         viewPager.setAdapter(sectionsPagerAdapter);
+
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.addTab(tabLayout.newTab().setText("Glucose"));
         tabLayout.addTab(tabLayout.newTab().setText("Insulin"));

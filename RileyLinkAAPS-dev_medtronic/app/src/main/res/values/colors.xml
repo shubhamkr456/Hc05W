@@ -4,9 +4,16 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="red">#F44336</color>
+    <color name="black">#000000</color>
     <color name="blue">#0D47A1</color>
     <color name="light_blue">#0091EA</color>
     <color name="green">#00C853</color>
     <color name="amber">#FFAB00</color>
     <color name="bluet">#0F67D1</color>
+    <color name="errorText">#ff7878</color>
+    <color name="textPrimary">#f5f5f5</color>
+    <color name="textPrimaryDark">#95aab4</color>
+    <color name="Signup_primary">#A6008577</color>
+    <color name="text_color">#FE10D9AE</color>
+    <color name="graphs_text">#E711DD</color>
 </resources>

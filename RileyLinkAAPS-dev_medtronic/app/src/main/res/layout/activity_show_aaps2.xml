@@ -96,22 +96,41 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvCommandExecution"
+            android:layout_width="180dp"
             android:layout_height="40dp"
+            android:text="Command: " />
+
+        <Button
+            android:id="@+id/btnStart"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Start" />
+
+
+    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tvCommandExecution"
-                android:layout_width="180dp"
-                android:layout_height="40dp"
-                android:text="Command: " />
+
 
             <Button
-                android:id="@+id/btnStart"
+                android:id="@+id/closedloop"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
+                android:layout_marginTop="60dp"
                 android:layout_weight="1"
-                android:text="Start" />
+                android:text="Closed Loop"
+                android:onClick="closedloop"/>
+
 
         </LinearLayout>
 
@@ -122,12 +141,125 @@
             android:layout_height="fill_parent"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp">
-
-            <TextView
-                android:id="@+id/textViewComm"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:id="@+id/textLabelActivity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Activity:"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/bluet" />
+
+                <Space
+                    android:layout_width="20px"
+                    android:layout_height="20px" />
+
+                <ProgressBar
+                    android:id="@+id/progressBarCommandActivity"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <Space
+                    android:layout_width="20px"
+                    android:layout_height="20px" />
+
+                <TextView
+                    android:id="@+id/textViewActivity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Connecting to Service"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/bluet" />
+
+                <Space
+                    android:layout_width="20px"
+                    android:layout_height="20px" />
+
+                <ProgressBar
+                    android:id="@+id/progressBarSpinny"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:indeterminateBehavior="cycle" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:id="@+id/textViewLabelRileyLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="RileyLink: "
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/bluet" />
+
+                <Space
+                    android:layout_width="20px"
+                    android:layout_height="20px" />
+
+                <TextView
+                    android:id="@+id/textViewFieldRileyLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="(not found)"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/bluet" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp">
+
+                <TextView
+                    android:id="@+id/textViewLabelPump"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pump: "
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/bluet" />
+
+                <Space
+                    android:layout_width="20px"
+                    android:layout_height="20px" />
+
+                <TextView
+                    android:id="@+id/textViewFieldPump"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(not found)"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/bluet" />
+
+            </LinearLayout>
+                <TextView
+                    android:id="@+id/textViewComm"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="" />
+            </LinearLayout>
+
+
+
         </ScrollView>
 
     </LinearLayout>
