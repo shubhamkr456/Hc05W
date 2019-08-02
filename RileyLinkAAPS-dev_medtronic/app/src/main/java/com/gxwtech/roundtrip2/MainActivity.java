@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
                     prefsEditor.putString("MyObject", jsonArray.toString());
                     if(q==true) {
-                        if(MedtronicUtil.getMedtronicPumpModel()!=null) {
+
                             ShowAAPS2Activity hi = new ShowAAPS2Activity(text, MainActivity.this);
                             Boolean checkon = hi.commandSelected1("Set Bolus");
 
@@ -254,10 +254,8 @@ public class MainActivity extends AppCompatActivity {
                                 openloopcheck = true;
                                 setRileylinkStatusMessage("OK");
                             }
-                        }
-                        else {
-                            l=l+1;
-                        }
+
+
                     }
 //                    try {
 //                        writeToFile(data,getApplicationContext());
